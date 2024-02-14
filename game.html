@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEVHER WORD SEARCH</title>
+    <style>
+         html {
+      margin: 0;
+      overflow: hidden;
+background: #FF3399;
+background: linear-gradient(135deg, #FF3399, #DB95E0);
+    }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #wordSearch {
+            display: grid;
+            gap: 5px;
+            grid-template-columns: repeat(10, 40px);
+            grid-template-rows: repeat(10, 40px);
+            opacity: 0; /* Initially set opacity to 0 for fade-in animation */
+            animation: fadeIn 1s forwards;
+            color:#ffffff;
+            align-items: center;
+            justify-content: center;
+        }
+        #heading{
+            position: absolute;
+            top:0 ;
+           color: #ffffff;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            display: flex;
+    border: 1px solid #ff0080;
+    align-items: center;
+    justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s; /* Smooth transition for cell selection */
+        }
+
+        .selected {
+            background-color: rgb(255, 255, 255);
+            color: #ff0080;
+        }
+
+        .correct {
+            background-color: lightgreen;
+        
+        }
+
+        .level-buttons {
+            margin-top: 20px;
+        }
+
+        #score {
+            color: #ffffff;
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 10px;
+            font-weight: bold;
+            font-size: 30px;
+        }
+        #levels {
+            color: #ffffff;
+            position: absolute;
+            top: 0;
+            left: 0;
+            margin: 10px;
+            font-weight: bold;
+            font-size: 30px;
+        }
+        #play-button{
+        position: absolute;
+        bottom: 0;
+        right:0;
+        margin: 10px;
+            font-weight: bold;
+            font-size: 50px;
+            background: transparent;
+            border: none;
+            outline: none;
+    }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+    <title>Word Search Game</title>
+</head>
+<body>
+    <audio id="my_audio" loop autoplay src="story.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+      </audio>
+      <button id="play-button" onclick="toggleMute()">&#x1F50A;</button>
+  <div class="heartfall-container" id="heartfall-container"></div>
+  
+    <h1 id="heading">DEVHER Word Search</h1>
+    <div id="wordSearch"></div>
+    <div id="score">Score: 0</div>
+    <div class="level-buttons">
+        <div id="levels"></div>
+    </div>
+
+    <script>
+        const levels = {
+            easy: {
+                gridSize: 8,
+                words: ['DEV', 'HER', 'RAMU', 'SIVU']
+            },
+            medium: {
+                gridSize: 10,
+                words: ['DEVHER', 'PENQUIN', 'GIRAF', 'LOVE']
+            },
+            hard: {
+                gridSize: 12,
+                words: ['NARUTO', 'SEVEN', 'HERMOINE', 'DEVIL']
+            }
+        };
+
+        let currentLevel;
+        let selectedWords = [];
+        let score = 0;
+        let valueLevel;
+
+        function startGame(level) {
+            currentLevel = levels[level];
+            valueLevel=level;
+            selectedWords = [];
+            score = 0;
+            updateScore();
+            generateWordSearch();
+        }
+        const val=document.getElementById("my_audio")
+
+val.play()
+
+        function toggleMute() {
+  if (val.muted) {
+    val.muted = false;
+    val.play()
+  } else {
+    val.muted = true;
+  }
+}
+
+        function generateWordSearch() {
+            const wordSearch = document.getElementById('wordSearch');
+            wordSearch.innerHTML = '';
+            document.getElementById('levels').innerHTML=valueLevel.toUpperCase();
+            const gridSize = currentLevel.gridSize;
+            const words = currentLevel.words.slice(); // Create a copy of the array
+            if(valueLevel=="easy"){
+            document.getElementById("wordSearch").style.gridTemplateColumns="repeat(8, 40px)";}
+            else if(valueLevel=="medium"){
+            document.getElementById("wordSearch").style.gridTemplateColumns="repeat(10, 40px)";}
+            else{
+                document.getElementById("wordSearch").style.gridTemplateColumns="repeat(12, 40px)";}
+            
+            // Shuffle the words to place them randomly
+            for (let i = words.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [words[i], words[j]] = [words[j], words[i]];
+            }
+
+            const cells = [];
+
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.textContent = getRandomLetter();
+                    cell.addEventListener('click', () => selectCell(i, j));
+                    wordSearch.appendChild(cell);
+                    cells.push(cell);
+                }
+            }
+
+            // Place the words in the grid
+            words.forEach(word => placeWords(cells, word));
+            
+            // Remove the opacity property to trigger the fade-in animation
+            wordSearch.style.opacity = '';
+        } 
+
+        function getRandomLetter() {
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            return alphabet[Math.floor(Math.random() * alphabet.length)];
+        }
+
+        function placeWords(cells, word) {
+            const direction = Math.random() < 0.5 ? 'horizontal' : 'vertical';
+            const { startRow, startCol } = calculateStartPosition(word, direction);
+
+            let index = startRow * currentLevel.gridSize + startCol;
+
+            for (let i = 0; i < word.length; i++) {
+                if (direction === 'horizontal') {
+                    index = startRow * currentLevel.gridSize + startCol + i;
+                } else {
+                    index = (startRow + i) * currentLevel.gridSize + startCol;
+                }
+                cells[index].textContent = word[i];
+            }
+        }
+
+        function selectCell(row, col) {
+            const index = row * currentLevel.gridSize + col;
+            const selectedCell = document.querySelector(`.cell:nth-child(${index + 1})`);
+
+            if (selectedCell.classList.contains('selected')) {
+                selectedCell.classList.remove('selected');
+                return;
+            }
+
+            selectedCell.classList.add('selected');
+            const selectedWord = getWordFromSelection();
+
+            if (checkWord(selectedWord)) {
+                score += selectedWord.length;
+                updateScore();
+                markCorrectCells();
+                showPopup('Correct!');
+                setTimeout(() => {
+                //    clearSelection();
+                    nextWord();
+                }, 1000);
+                
+            }
+           if(selectedWords.length==4){
+            nextWord()
+           }
+        }
+
+        function markCorrectCells() {
+            const selectedCells = document.querySelectorAll('.selected');
+            selectedCells.forEach(cell => {
+                cell.classList.remove('selected');
+                cell.classList.add('correct');
+            });
+        }
+
+        function showPopup(message) {
+            alert(message);
+        }
+
+        function clearSelection() {
+            const selectedCells = document.querySelectorAll('.correct');
+            selectedCells.forEach(cell => {
+                cell.classList.remove('correct');
+            });
+        }
+
+        function nextWord() {
+            const remainingWords = currentLevel.words.filter(word => !selectedWords.includes(word));
+            console.log(remainingWords,selectedWords)
+            if (remainingWords.length > 1 ) {
+                const nextWord = remainingWords[0];
+                selectedWords.push(nextWord);
+                
+            } else {
+                console.log("inside")
+                alert('Congratulations! You found all the words.')
+                // Automatically move to the next level
+                const currentLevelIndex = Object.keys(levels).indexOf(valueLevel);
+                const nextLevel = Object.keys(levels)[currentLevelIndex + 1];
+                console.log(nextLevel,currentLevelIndex)
+                if (nextLevel) {
+                    setTimeout(() => {
+                        startGame(nextLevel);
+                    }, 100);
+                } else {
+                    alert('You completed all levels!');
+                    location.href="win.html"
+                }
+            }
+        }
+        function calculateStartPosition(word, direction) {
+    const gridSize = currentLevel.gridSize;
+    let startRow, startCol;
+
+    if (direction === 'horizontal') {
+        startRow = Math.floor(Math.random() * gridSize);
+        startCol = Math.floor(Math.random() * (gridSize - word.length + 1));
+        while(startCol>gridSize || startRow>gridSize){
+            startRow = Math.floor(Math.random() * gridSize);
+        startCol = Math.floor(Math.random() * (gridSize - word.length + 1));
+        }
+    } else {
+        startRow = Math.floor(Math.random() * (gridSize - word.length + 1));
+        startCol = Math.floor(Math.random() * gridSize);
+        while(startCol>gridSize || startRow>gridSize){
+            startRow = Math.floor(Math.random() * gridSize);
+        startCol = Math.floor(Math.random() * (gridSize - word.length + 1));
+        }
+    }
+
+    return { startRow, startCol };
+}
+
+        function getWordFromSelection() {
+            const selectedCells = document.querySelectorAll('.selected');
+            return Array.from(selectedCells).map(cell => cell.textContent).join('');
+        }
+
+        function checkWord(word) {
+            return currentLevel.words.includes(word);
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = `Score: ${score}`;
+        }
+
+        function getTotalPossibleScore() {
+            return currentLevel.words.reduce((total, word) => total + word.length, 0);
+        }
+
+        // Start the game with an initial level
+        startGame('easy');
+    </script>

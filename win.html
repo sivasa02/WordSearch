@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DEVHER WORD SEARCH</title>
+  <style>
+    html {
+      margin: 0;
+      overflow: hidden;
+background: #FF3399;
+background: linear-gradient(135deg, #FF3399, #DB95E0);
+    }
+
+    .heartfall-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .heart {
+      width: 20px;
+      height: 20px;
+      position: absolute;
+      transform: rotate(45deg);
+      animation: fall 2s linear infinite;
+    }
+
+    .heart svg {
+      width: 100%;
+      height: 100%;
+      fill: red;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: rotate(45deg) translate(0, 0);
+      }
+      100% {
+        transform: rotate(45deg) translate(0, 100vh);
+      }
+    }
+
+    .content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: white;
+      font-family: 'Arial', sans-serif;
+    }
+    #play-button{
+        position: absolute;
+        bottom: 0;
+        right:0;
+        margin: 10px;
+            font-weight: bold;
+            font-size: 50px;
+            background: transparent;
+            border: none;
+            outline: none;
+    }
+    .next-button {
+      width: 50px;
+      height: 50px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding: 0;
+      position: relative;
+      animation: heartbeat 1.5s infinite;
+    }
+
+    .next-button::before,
+    .next-button::after {
+      content: '';
+      width: 32px;
+      height: 50px;
+      position: absolute;
+      background-color: red;
+      border-radius: 50%;
+    }
+
+    .next-button::before {
+      left: 0;
+      transform: translateX(0px) rotate(-45deg);
+    }
+
+    .next-button::after {
+      right: 0;
+      transform: translateX(0px) rotate(45deg);
+    }
+
+    @keyframes heartbeat {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(2);
+      }
+    }
+  </style>
+</head>
+<body>
+    <audio id="my_audio" loop autoplay src="Magic in Her Eyes.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+      </audio>
+      <button id="play-button" onclick="toggleMute()">&#x1F50A;</button>
+  <div class="heartfall-container" id="heartfall-container"></div>
+
+  <div class="content">
+    <!-- Your landing page content goes here -->
+    <h1>YOU ARE THE BEST HERMOINE!!!!!</h1>
+    <h1>Thank you for being there with me</h1>
+    <h1>I LOVE YOU</h1>
+    <button class="next-button"></button>
+  </div>
+
+  <script>
+    // Add any JavaScript functionality here if needed
+    function nextPage() {
+      // Handle the next page logic
+      
+    }
+    const val=document.getElementById("my_audio")
+
+val.play()
+    function toggleMute() {
+  if (val.muted) {
+    val.muted = false;
+    val.play()
+  } else {
+    val.muted = true;
+  }
+}
+
+    // Dynamically create hearts and append them to the container
+    const container = document.getElementById('heartfall-container');
+    
+    function createHeart() {
+      const heart = document.createElement('div');
+      heart.className = 'heart';
+      const positionX = Math.random() * window.innerWidth;
+      heart.style.top = '0px';
+      heart.style.left = `${positionX}px`;
+      heart.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C6.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C15.09 3.81 16.76 3 18.5 3 21.58 3 24 5.42 24 8.5c0 3.78-4.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+      container.appendChild(heart);
+    }
+
+    // Create hearts every 500 milliseconds
+    setInterval(createHeart, 1000);
+  </script>
+
+</body>
+</html>
